@@ -2042,7 +2042,7 @@ function restoreBackup(input){
       // Re-render everything
       renderTodos(); renderLinks(); renderOutreach();
       loadNotes(); renderConvoNotes(); renderDocs();
-      renderHandoffs(); renderTrips(); renderSavedSchedules(); renderTMPanel();
+      renderHandoffs(); renderTrainingTab(); renderSavedSchedules(); renderTMPanel();
       updateHomeStats(); updateExportCounts();
       alert('\u{2705} Backup restored successfully!');
     } catch(err) {
@@ -2374,7 +2374,7 @@ async function loadAllFromSupabase() {
     });
     renderTodos(); renderLinks(); renderOutreach();
     loadNotes(); renderConvoNotes(); renderDocs();
-    renderHandoffs(); renderTrips(); renderSavedSchedules(); renderTMPanel();
+    renderHandoffs(); renderTrainingTab(); renderSavedSchedules(); renderTMPanel();
     updateHomeStats(); updateExportCounts();
     setSyncStatus('synced', 'Synced \u{2713}');
   } catch(e) {
