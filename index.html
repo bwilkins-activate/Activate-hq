@@ -1277,15 +1277,20 @@ function renderTrainingTab() {
   }
   daysEl.innerHTML = daysHtml;
   // Task list
-  const dayItems = progItems.filter(i=>i.day===trainingDay).sort((a,b)=>{
-    const toMin = t => { if(!t) return 0; const m=t.match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m) return 0; let h=parseInt(m[1]),mn=parseInt(m[2]); if(m[3].toUpperCase()==='PM'&&h!==12)h+=12; if(m[3].toUpperCase()==='AM'&&h===12)h=0; return h*60+mn; };
-    return toMin(a.time)-toMin(b.time);
-  });
+  const toMin = t => { if(!t) return 0; const m=t.match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m) return 0; let h=parseInt(m[1]),mn=parseInt(m[2]); if(m[3].toUpperCase()==='PM'&&h!==12)h+=12; if(m[3].toUpperCase()==='AM'&&h===12)h=0; return h*60+mn; };
+  const dayItems = progItems.filter(i=>i.day===trainingDay).sort((a,b)=>toMin(a.time)-toMin(b.time));
   if(progItems.length === 0) { contentEl.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted)">Syncing training plan from Google Sheets\u2026</div>'; return; }
   const done = dayItems.filter(i=>trainingProgress[trainingKey(i)]).length;
   const total = dayItems.length;
   const pct = total ? Math.round(done/total*100) : 0;
-  let html = `<div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-weight:600;font-size:15px">${escHtml(trainingProgram)} &#8212; Day ${trainingDay}</div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:13px;color:var(--muted)">${done}/${total} complete</span><button class="btn btn-ghost btn-sm" onclick="resetTrainingDay()">Reset</button></div></div><div class="progress-bar" style="margin-bottom:0"><div class="progress-fill" style="width:${pct}%;${pct===100?'background:var(--accent3)':''}"></div></div></div>`;
+  const firstTime = dayItems.length ? dayItems[0].time : '';
+  const lastTime  = dayItems.length ? dayItems[dayItems.length-1].time : '';
+  const spanMins  = (firstTime && lastTime) ? toMin(lastTime) - toMin(firstTime) : 0;
+  const spanHrs   = spanMins > 0 ? (Number.isInteger(spanMins/60) ? spanMins/60 : Math.round(spanMins/60*10)/10) : 0;
+  const timeRangeStr = (firstTime && lastTime && spanHrs > 0)
+    ? ` <span style="font-size:12px;color:var(--muted);font-weight:400;font-family:'DM Mono',monospace">${escHtml(firstTime)}\u2013${escHtml(lastTime)} \u00B7 ${spanHrs} hr${spanHrs!==1?'s':''}</span>`
+    : '';
+  let html = `<div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-weight:600;font-size:15px">${escHtml(trainingProgram)} &#8212; Day ${trainingDay}${timeRangeStr}</div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:13px;color:var(--muted)">${done}/${total} complete</span><button class="btn btn-ghost btn-sm" onclick="resetTrainingDay()">Reset</button></div></div><div class="progress-bar" style="margin-bottom:0"><div class="progress-fill" style="width:${pct}%;${pct===100?'background:var(--accent3)':''}"></div></div></div>`;
   if(dayItems.length === 0) {
     html += '<div style="text-align:center;padding:28px;color:var(--muted);font-size:14px">No tasks for Day '+trainingDay+'. Add them in the Google Sheet.</div>';
   } else {
